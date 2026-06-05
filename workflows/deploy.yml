@@ -1,0 +1,70 @@
+name: Deploy Database
+
+on:
+
+  workflow_dispatch:
+
+    inputs:
+
+      environment:
+        description: Ambiente destino
+        required: true
+        type: string
+
+      script:
+        description: Script SQL
+        required: true
+        type: string
+
+      issue:
+        description: Numero de Issue
+        required: false
+        type: string
+
+jobs:
+
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: ${{ inputs.environment }}
+
+    steps:
+
+      - name: Checkout
+
+        uses: actions/checkout@v4
+
+      - name: Mostrar parametros
+
+        run: |
+
+          echo "Issue: ${{ inputs.issue }}"
+          echo "Environment: ${{ inputs.environment }}"
+          echo "Script: ${{ inputs.script }}"
+
+      - name: Validar existencia del script
+
+        run: |
+
+          if [ ! -f scripts/${{ inputs.script }} ]
+          then
+            echo "ERROR: Script no existe"
+            exit 1
+          fi
+
+      - name: Mostrar contenido SQL
+
+        run: |
+
+          echo "Contenido del script:"
+          cat scripts/${{ inputs.script }}
+
+      - name: Simular Deploy
+
+        run: |
+
+          echo "Ejecutando despliegue..."
+          sleep 5
+          echo "Deploy completado correctamente"
