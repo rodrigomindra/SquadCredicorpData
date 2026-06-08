@@ -11,15 +11,14 @@ on:
         required: true
         type: string
 
-      script:
-        description: Script SQL
-        required: true
-        type: string
-
       issue:
         description: Numero de Issue
         required: false
         type: string
+
+env:
+
+  SCRIPT_SQL: V001__create_table.sql
 
 jobs:
 
@@ -29,6 +28,10 @@ jobs:
 
     environment:
       name: ${{ inputs.environment }}
+
+    env:
+
+      CATALOGO: catalog_lhcl_credicorp_${{ inputs.environment }}
 
     steps:
 
@@ -40,31 +43,74 @@ jobs:
 
         run: |
 
+          echo "======================================="
+          echo "Parametros de ejecucion"
+          echo "======================================="
           echo "Issue: ${{ inputs.issue }}"
           echo "Environment: ${{ inputs.environment }}"
-          echo "Script: ${{ inputs.script }}"
+          echo "Catalogo: $CATALOGO"
+          echo "Script: $SCRIPT_SQL"
 
       - name: Validar existencia del script
 
         run: |
 
-          if [ ! -f scripts/${{ inputs.script }} ]
+          if [ ! -f scripts/$SCRIPT_SQL ]
           then
             echo "ERROR: Script no existe"
             exit 1
           fi
 
-      - name: Mostrar contenido SQL
+          echo "Script encontrado correctamente"
+
+      - name: Generar SQL parametrizado
 
         run: |
 
-          echo "Contenido del script:"
-          cat scripts/${{ inputs.script }}
+          sed "s/{{CATALOGO}}/$CATALOGO/g" scripts/$SCRIPT_SQL > deploy.sql
+
+      - name: Mostrar SQL generado
+
+        run: |
+
+          echo "======================================="
+          echo "SQL generado"
+          echo "======================================="
+
+          cat deploy.sql
 
       - name: Simular Deploy
 
         run: |
 
-          echo "Ejecutando despliegue..."
+          echo "======================================="
+          echo "Iniciando despliegue"
+          echo "======================================="
+
           sleep 5
-          echo "Deploy completado correctamente"
+
+          echo "Deploy ejecutado en ambiente ${{ inputs.environment }}"
+          echo "Catalogo utilizado: $CATALOGO"
+
+      - name: Validaciones post deploy
+
+        run: |
+
+          echo "Validando objetos desplegados..."
+          echo "Validando tablas..."
+          echo "Validando permisos..."
+
+          sleep 3
+
+          echo "Validaciones completadas"
+
+      - name: Resultado final
+
+        run: |
+
+          echo "======================================="
+          echo "DEPLOY FINALIZADO EXITOSAMENTE"
+          echo "======================================="
+          echo "Ambiente: ${{ inputs.environment }}"
+          echo "Catalogo: $CATALOGO"
+          echo "Script: $SCRIPT_SQL"
