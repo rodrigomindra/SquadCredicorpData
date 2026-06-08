@@ -1,4 +1,9 @@
-CREATE TABLE clientes_demo (
+CREATE TABLE {{CATALOGO}}.credicorp_bronce_int.clientes (
+
     id INT,
-    nombre VARCHAR(100)
+
+    nombre STRING,
+
+    fecha_creacion TIMESTAMP
+
 );
